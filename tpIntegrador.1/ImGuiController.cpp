@@ -76,6 +76,7 @@ void ImGuiController::dispatch() {
 
 			std::string fileName(newpath);
 			m.getFilesFromFolder(fileName);
+			m.validateBlockchainFiles();
 
 			for (int j = 0; j < m.getCantOfFiles(); j++) {
 				ImGui::Checkbox(((m.getPathnames())->at(j)).c_str(), &(m.getLabel())[j]);

@@ -20,10 +20,13 @@ public:
 
 private:
 	std::string path;
+	std::vector<std::string> fileRoute;
 	std::vector<std::string> pathnames;
 	std::vector<bool> labels;
 	bool label[50];
 	//bool lookProperties;
 	int cantOfFiles;
 	bool finish;
+
+	bool validateBlockchainFile(std::string fileName);
 };
