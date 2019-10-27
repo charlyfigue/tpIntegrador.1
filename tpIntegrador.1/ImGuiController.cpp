@@ -1,9 +1,15 @@
-/*#include <iostream>
+#include <iostream>
 #include "ImGuiController.h"
+#include <boost/filesystem.hpp>
 #include <string> 
+#include <vector>
 
-ImGuiController::ImGuiController(ALLEGRO_DISPLAY** disp, Model& modelo) : Controller(modelo) {
+using namespace boost::filesystem;
+
+ImGuiController::ImGuiController(imguiAcces* imguiInterfaz, Model& modelo) : Controller(modelo) {
+	lookProperties = false;
 	isError = true;
+	isFinished = false;
 	shouldQuit = false;
 	oldVelocidad = 1;
 	queueEmpty = false;
@@ -11,8 +17,8 @@ ImGuiController::ImGuiController(ALLEGRO_DISPLAY** disp, Model& modelo) : Contro
 	oldCantidadTuits = 0;
 	cantidadTuits = 0;
 	stateOfScroll = false;
-	display = (*disp);
-	eventQueue = al_create_event_queue();
+	display = imguiInterfaz->getDisplay();
+	eventQueue = imguiInterfaz->getEventQueue();
 	if (eventQueue != NULL)
 	{
 		al_register_event_source(eventQueue, al_get_keyboard_event_source());
@@ -20,148 +26,76 @@ ImGuiController::ImGuiController(ALLEGRO_DISPLAY** disp, Model& modelo) : Contro
 		al_register_event_source(eventQueue, al_get_display_event_source(display));
 		isError = false;
 	}
-}
-
-ImGuiController::~ImGuiController()
-{
-	al_unregister_event_source(eventQueue, al_get_display_event_source(display));
-	al_destroy_event_queue(eventQueue);
+	else
+		std::cout << "Error en la inicializacion del controler" << std::endl;
 }
 
 void ImGuiController::update(void* objeto) {
 	//printf("Pantalla actualizada\n");
 }
 
-void ImGuiController::run() {
-	while (ev.type != FIN_IMGUI) {
-		cycle();
-	}
+bool ImGuiController::isOver() {
+	return isFinished;
 }
 
 void ImGuiController::cycle() {
-	if (al_get_next_event(eventQueue, &ev)) {
-		queueEmpty = false;
-		//if (!(ev.type == NO_EVENT) && !(ev.type == FIN_IMGUI)) {
-		dispatch();
-		//}
-	}
-	else {
-		queueEmpty = true;
-		dispatch();
-	}
+	getEvent();
+	dispatch();
 }
 
 void ImGuiController::getEvent() {
 	if (!al_get_next_event(eventQueue, &ev))
-		ev.type = NO_EVENT;
+		queueEmpty = true;
+	else
+		queueEmpty = false;
 }
 
 void ImGuiController::dispatch() {
 	if (!queueEmpty) {
 		ImGui_ImplAllegro5_ProcessEvent(&ev);
-		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-			shouldQuit = true;
-			ev.type = FIN_IMGUI;
-			return;
-		}
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+			isFinished = true;
 	}
 	else {
 		ImGui_ImplAllegro5_NewFrame();
 		ImGui::NewFrame();
+
 		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-		ImGui::Begin("EDA Twitter");
+		ImGui::Begin("EDA Encoder");
 
-		static char user[50] = {};
+		static char newpath[256] = {};
+		bool windows[1000];
+		int i = 0;
+		std::string labels[1000];
+		std::vector<ALLEGRO_BITMAP*> vbitmap;
+		if (!lookProperties) {
+			ImGui::InputText("Ingresar Directorio", newpath, sizeof(newpath));
+			ImGui::Separator();
 
-		ImGui::Text("Puede conocer los tuits publicados por otra persona.");
-		ImGui::Text("Ingrese el usuario abajo y la cantidad de tuits que solicita.");
-		ImGui::Text("De no enviar esta ultima, se tomara el valor default de Twitter.");
-		ImGui::NewLine();
-		ImGui::InputText("Usuario a buscar", user, sizeof(user));
-		ImGui::NewLine();
-		ImGui::Checkbox("Especificar cantidad", &isCantidad);
-		if (!m.getInProcess()) {
-			if (isCantidad) {
-				ImGui::SliderInt("Numero de tweets", &cantidadTuits, 0, 100);
-				if ((!stateOfScroll) || (oldCantidadTuits != cantidadTuits)) {
-					m.changeTweetAmount(cantidadTuits);
-					oldCantidadTuits = cantidadTuits;
-				}
-				stateOfScroll = true;
-			}
-			else {
-				if (stateOfScroll)
-					m.changeTweetAmount(0);
-				stateOfScroll = false;
-			}
-		}
-		ImGui::NewLine();
-		bool startDownload = ImGui::Button("Comenzar operacion");
-		if (startDownload) {
 
-			if (m.getInProcess() == false) {
-				if (tweethand.startFetchingTweets(user, cantidadTuits)) {
-					m.setUser(user);
-					m.manageOutputWhile();
-					m.startDownload();
-					isCantidad = false;
-				}
-				else {
-					vector<string> errors;
-					errors.push_back("No se pudo iniciar la obtencion de tweets");
-					m.setErrors(errors);
+			std::string fileName(newpath);
+			m.getFilesFromFolder(fileName);
+
+			for (int j = 0; j < m.getCantOfFiles(); j++) {
+				ImGui::Checkbox(((m.getPathnames())->at(j)).c_str(), &(m.getLabel())[j]);
+				if ((m.getLabel())[j]) {
+					ImGui::SameLine();
+					ImGui::Text("      ");
+					ImGui::SameLine();
+					if (ImGui::Button("Propiedades"))
+						lookProperties = true;
+					m.fileChoosen(j);
 				}
 			}
 		}
-		if (m.getInProcess()) {
+		else {
+			if (ImGui::Button("Volver")) {
+				m.reInitSearchFileFromFolder();
+				lookProperties = false;
+			}
+		}
 
-			ImGui::NewLine();
-			ImGui::Text("Descargando archivos...");
-			ImGui::SameLine();
-			bool cancel = ImGui::Button("Cancelar descarga");
-			if (cancel || tweethand.performFetch()) {
-				m.setErrors(tweethand.cleanupFetch());
-				m.setTweets(tweethand.getTweets());
-				m.setTweetsDates(tweethand.getDates());
-				m.manageOutputDo();
-				m.finishDownload();
-			}
-			else {
-				m.sendWhileOutput();
-			}
-		}
-		if (m.isFinished()) {
-			ImGui::Text("Tweets descargados: %d", m.getTweetAmount());
-			ImGui::Text("Mostrando en pantalla: Tuit%d", m.getCurrentTweetIndex());
-			ImGui::NewLine();
-			bool pre = ImGui::Button("Tweet anterior");
-			ImGui::SameLine();
-			bool reset = ImGui::Button("Repetir Tweet");
-			ImGui::SameLine();
-			bool pos = ImGui::Button("Tweet posterior");
-			ImGui::SliderInt("Velocidad", &velocidad, 1, 8);
-			ImGui::NewLine();
-			bool reInit = ImGui::Button("Reiniciar la busqueda");
-			if (pre)
-				m.showPreviousTweet();
-			if (pos)
-				m.showNextTweet();
-			if (reset)
-				m.resetTweet();
-			if (oldVelocidad != velocidad) {
-				m.changeSpeed(velocidad);
-				oldVelocidad = velocidad;
-			}
-			if (reInit)
-				m.readyForDownload();
-			m.displayTuits();
-			bool salir = ImGui::Button("Salir");
-			if (salir) {
-				ev.type = FIN_IMGUI;
-				return;
-			}
-		}
 		ImGui::End();
 
 		// Rendering
@@ -171,4 +105,3 @@ void ImGuiController::dispatch() {
 		al_flip_display();
 	}
 }
-*/

@@ -1,12 +1,13 @@
 #pragma once
 #include "Controller.h"
 #include "Model.h"
-/*#include "imgui.h"
+#include "imguiAcces.h"
+
+#include "imgui.h"
 #include "imgui_impl_allegro5.h"
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
-#include "TwitterHandler.h"
 
 #define FIN_IMGUI ALLEGRO_EVENT_DISPLAY_CLOSE
 #define NO_EVENT ALLEGRO_EVENT_MOUSE_BUTTON_UP
@@ -17,11 +18,12 @@ typedef ALLEGRO_DISPLAY* Display;
 
 class ImGuiController :public Controller {
 public:
-	ImGuiController(ALLEGRO_DISPLAY** disp, Model& modelo);
-	~ImGuiController();
+	ImGuiController(imguiAcces* imguiInterfaz, Model& modelo);
 	void update(void*);
 	void run(void);
 	void cycle(void);
+	bool getLookProperties() { return lookProperties; }
+	bool isOver(void);
 
 private:
 	void getEvent(void);
@@ -29,6 +31,8 @@ private:
 	Evento ev;
 	ColaDeEvento eventQueue;
 	ALLEGRO_DISPLAY* display;
+	bool lookProperties;
+	bool isFinished;
 	bool queueEmpty;
 	bool isError;
 	bool shouldQuit;
@@ -38,6 +42,4 @@ private:
 	int cantidadTuits;
 	int velocidad;
 	int oldVelocidad;
-
-	TwitterHandler tweethand;
-};*/
+};

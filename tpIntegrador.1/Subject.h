@@ -2,8 +2,6 @@
 #include <iostream>
 #include <list>
 
-using namespace std;
-
 class Subject 
 {
 	public:
@@ -16,5 +14,5 @@ class Subject
 	void notifyAllObservers(void);
 	
 	private:
-	list<observer*> listOfObservers;
+	std::list<observer*> listOfObservers;
 };

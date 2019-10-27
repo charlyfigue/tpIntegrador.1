@@ -1,5 +1,7 @@
 #include "Subject.h"
 
+using namespace std;
+
 void
 Subject::attach(observer * observerPtr)
 {
