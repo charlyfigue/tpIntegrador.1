@@ -130,7 +130,9 @@
     <ClCompile Include="imgui_draw.cpp" />
     <ClCompile Include="imgui_impl_allegro5.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
+    <ClCompile Include="jsonHandler.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="merkleTree.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Subject.cpp" />
   </ItemGroup>
@@ -147,6 +149,8 @@
     <ClInclude Include="imstb_textedit.h" />
     <ClInclude Include="imstb_truetype.h" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="jsonHandler.h" />
+    <ClInclude Include="merkleTree.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="Subject.h" />

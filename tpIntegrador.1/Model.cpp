@@ -1,6 +1,7 @@
 #include "Model.h"
 #include <iostream>
 #include <string>
+//#include "json.hpp"
 
 using namespace boost::filesystem;
 
@@ -40,7 +41,7 @@ void Model::fileChoosen(int position) {
 }
 
 void Model::blockChoosen(int position) {
-	for (int i = 0; i < cantOfFiles; i++)
+	for (int i = 0; i < cantOfBlocks; i++)
 		if (i != position)
 			blocksLabel[i] = false;
 }
@@ -62,7 +63,7 @@ void Model::getFilesFromFolder(std::string path_t) {
 		labels.clear();
 		if (exists(p) && is_directory(p)) {
 			for (directory_iterator it{ p }; it != directory_iterator{}; it++) {
-				if ((*it).path().extension().string() == ".png") {
+				if ((*it).path().extension().string() == ".json") {
 					fileRoute.push_back ((*it).path().string());
 					pathnames.push_back((*it).path().filename().string());
 				}
@@ -74,22 +75,42 @@ void Model::getFilesFromFolder(std::string path_t) {
 		}
 		else
 			cantOfFiles = 0;
+		validateBlockchainFiles();
 	}
 }
 
 void Model::validateBlockchainFiles() {
+	int cont = 0;
 	for (int j = 0; j < cantOfFiles; j++) {
 		if (!validateBlockchainFile(fileRoute[j])) {
 			fileRoute.erase(fileRoute.begin() + j);
 			pathnames.erase(pathnames.begin() + j);
 			labels.erase(labels.begin() + j);	
+			cont++;
 		}
 	}
+	cantOfFiles -= cont;
 }
 
 bool Model::validateBlockchainFile(std::string fileName) {
-	//Hacer toda la funcion de validacion
-	return true;
+	jsonHandl.jsonStartHandler(fileName);
+	std::string target = "text";
+	//target = "previousblockid";
+	if (jsonHandl.existJsonElement(target)) {
+		//target = "height";
+		if (jsonHandl.existJsonElement(target)) {
+			//target = "nonce";
+			if (jsonHandl.existJsonElement(target)) {
+				//target = "blockid";
+				if (jsonHandl.existJsonElement(target)) {
+					//target = "merkleroot";
+					if (jsonHandl.existJsonElement(target))
+						return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 void Model::findNumberOfBlocks() {
@@ -107,7 +128,7 @@ void Model::findNumberOfBlocks() {
 
 
 	//Para debuggear le digo que encontro 10, 20 o 30 bloques y que la ruta es simplemente un numero
-	switch (fileElected) {
+	/*switch (fileElected) {
 		case 0: case 1:case 2:case 3:case 4:
 			cantOfBlocks = 10;
 			break;
@@ -117,7 +138,7 @@ void Model::findNumberOfBlocks() {
 		case 9:case 10:case 11:case 12:
 			cantOfBlocks = 30;
 			break;
-	}
+	}*/
 	for (int i = 0; i < cantOfBlocks; i++) {
 		std::string name = "Block " + std::to_string(i);
 		blockNames.push_back(name);
@@ -126,17 +147,17 @@ void Model::findNumberOfBlocks() {
 }
 
 void Model::viewInformation() {
-
+	tree.viewInformation();
 }
 
 void Model::calculateMerkle() {
-
+	tree.calculateMerkle();
 }
 
 void Model::validateMerkle() {
-
+	tree.validateMerkle();
 }
 
 void Model::watchMerkle() {
-
+	tree.watchMerkle();
 }

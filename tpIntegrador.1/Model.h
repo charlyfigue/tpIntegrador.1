@@ -1,8 +1,10 @@
 #pragma once
 #include "Subject.h"
+#include "merkleTree.h"
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include "jsonHandler.h"
 
 class Model : public Subject {
 public:
@@ -30,6 +32,8 @@ public:
 	std::vector<std::string>* getBlockNames() { return &blockNames; }
 
 private:
+	MerkleTree tree;
+	jsonHandler jsonHandl;
 	std::string path;
 	std::vector<std::string> fileRoute;
 	std::vector<std::string> pathnames;

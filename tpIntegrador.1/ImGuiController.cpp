@@ -77,10 +77,8 @@ void ImGuiController::dispatch() {
 			ImGui::InputText("Ingresar Directorio", newpath, sizeof(newpath));
 			ImGui::Separator();
 
-
 			std::string fileName(newpath);
 			m.getFilesFromFolder(fileName);
-			m.validateBlockchainFiles();
 
 			for (int j = 0; j < m.getCantOfFiles(); j++) {
 				ImGui::Checkbox(((m.getPathnames())->at(j)).c_str(), &(m.getPathLabel())[j]);
