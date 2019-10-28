@@ -11,22 +11,37 @@ public:
 	void validateBlockchainFiles(void);
 	bool isFinished() { return finish; }
 	void reInitSearchFileFromFolder(void);
+	void reInitSearchBlockFromFile(void);
 	void fileChoosen(int position);
+	void blockChoosen(int position);
+	void findNumberOfBlocks(void);
+	void setFileChoseen(int position);
+	void viewInformation();
+	void calculateMerkle();
+	void validateMerkle();
+	void watchMerkle();
 
 	int getCantOfFiles() { return cantOfFiles; }
 	std::vector<bool>* getLabels() { return &labels; }
-	bool* getLabel() { return label; }
+	bool* getPathLabel() { return pathLabel; }
+	bool* getBlocksLabel() { return blocksLabel; }
 	std::vector<std::string>* getPathnames() { return &pathnames; }
+	int getNumberOfBlocks() { return cantOfBlocks; }
+	std::vector<std::string>* getBlockNames() { return &blockNames; }
 
 private:
 	std::string path;
 	std::vector<std::string> fileRoute;
 	std::vector<std::string> pathnames;
 	std::vector<bool> labels;
-	bool label[50];
-	//bool lookProperties;
+	std::vector<std::string> blockNames;
+	std::vector<std::string> blockRoute;
+	bool pathLabel[50];
+	bool blocksLabel[50];
+	int cantOfBlocks;
 	int cantOfFiles;
 	bool finish;
+	int fileElected;
 
 	bool validateBlockchainFile(std::string fileName);
 };

@@ -8,6 +8,10 @@ using namespace boost::filesystem;
 
 ImGuiController::ImGuiController(imguiAcces* imguiInterfaz, Model& modelo) : Controller(modelo) {
 	lookProperties = false;
+	lookBlocksProperties = false;
+	calculateMerkleRoot = false;
+	validateMerkleRoot = false;
+	watchMerkleRoot = false;
 	isError = true;
 	isFinished = false;
 	shouldQuit = false;
@@ -79,21 +83,83 @@ void ImGuiController::dispatch() {
 			m.validateBlockchainFiles();
 
 			for (int j = 0; j < m.getCantOfFiles(); j++) {
-				ImGui::Checkbox(((m.getPathnames())->at(j)).c_str(), &(m.getLabel())[j]);
-				if ((m.getLabel())[j]) {
+				ImGui::Checkbox(((m.getPathnames())->at(j)).c_str(), &(m.getPathLabel())[j]);
+				if ((m.getPathLabel())[j]) {
 					ImGui::SameLine();
 					ImGui::Text("      ");
 					ImGui::SameLine();
-					if (ImGui::Button("Propiedades"))
+					if (ImGui::Button("Propiedades")) {
+						m.setFileChoseen(j);
+						m.findNumberOfBlocks();
 						lookProperties = true;
+					}
 					m.fileChoosen(j);
 				}
 			}
+			
+			ImGui::NewLine();
+			ImGui::NewLine();
+			if (ImGui::Button("Salir")) {
+				isFinished = true;
+			}
 		}
 		else {
-			if (ImGui::Button("Volver")) {
-				m.reInitSearchFileFromFolder();
-				lookProperties = false;
+			if ((!lookBlocksProperties) && (!calculateMerkleRoot) && (!validateMerkleRoot) && (!watchMerkleRoot)) {
+				for (int j = 0; j < m.getNumberOfBlocks(); j++) {
+					ImGui::Checkbox(((m.getBlockNames())->at(j)).c_str(), &(m.getBlocksLabel())[j]);
+					if ((m.getBlocksLabel())[j]) {
+						ImGui::SameLine();
+						ImGui::Text("      ");
+						ImGui::SameLine();
+						ImGui::Columns(3, "Acciones posibles", false);
+						ImGui::NextColumn();
+						if (ImGui::Button("Propiedades"))
+							lookBlocksProperties = true;
+						if (ImGui::Button("Calcular Merkle root"))
+							calculateMerkleRoot = true;
+						if (ImGui::Button("Validar Merkle root"))
+							validateMerkleRoot = true;
+						if (ImGui::Button("Ver Merkle root"))
+							watchMerkleRoot = true;
+						ImGui::Columns();
+						m.blockChoosen(j);
+					}
+				}
+
+				ImGui::NewLine();
+				ImGui::NewLine();
+
+				if (ImGui::Button("Volver")) {
+					m.reInitSearchFileFromFolder();
+					lookProperties = false;
+				}
+			}
+			else {
+				if (lookBlocksProperties) {
+					m.viewInformation();
+				}
+				else if (calculateMerkleRoot) {
+					m.calculateMerkle();
+				}
+				else if (validateMerkleRoot) {
+					m.validateMerkle();
+				}
+				else {
+					m.watchMerkle();
+				}
+				ImGui::NewLine();
+				ImGui::NewLine();
+				if (ImGui::Button("Volver")) {
+					m.reInitSearchBlockFromFile();
+					if (lookBlocksProperties)
+						lookBlocksProperties = false;
+					if (calculateMerkleRoot)
+						calculateMerkleRoot = false;
+					if (validateMerkleRoot)
+						validateMerkleRoot = false;
+					if (watchMerkleRoot)
+						watchMerkleRoot = false;
+				}
 			}
 		}
 

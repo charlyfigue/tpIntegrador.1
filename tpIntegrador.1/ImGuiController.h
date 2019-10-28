@@ -32,6 +32,10 @@ private:
 	ColaDeEvento eventQueue;
 	ALLEGRO_DISPLAY* display;
 	bool lookProperties;
+	bool lookBlocksProperties;
+	bool calculateMerkleRoot;
+	bool validateMerkleRoot;
+	bool watchMerkleRoot;
 	bool isFinished;
 	bool queueEmpty;
 	bool isError;
