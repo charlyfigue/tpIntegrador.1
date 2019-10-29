@@ -14,7 +14,11 @@ class jsonHandler : public json
 public:
 	void jsonStartHandler(string route);
 	void getJson(void);
-	bool existJsonElement(string target);
+	bool existJsonBlock();
+	bool existJsonElementBlock(json::iterator begin, json::iterator end);
+	bool existJsonTransactionBlock(json::iterator begin, json::iterator end);
+	bool existJsonTransactonVoutBlock(json::iterator begin, json::iterator end);
+	bool existJsonTransactonVinBlock(json::iterator begin, json::iterator end);
 	vector<string> getDate(void);
 	vector<string> getTweet(void);
 	void printTweet(void);

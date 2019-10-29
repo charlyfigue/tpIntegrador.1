@@ -81,36 +81,28 @@ void Model::getFilesFromFolder(std::string path_t) {
 
 void Model::validateBlockchainFiles() {
 	int cont = 0;
-	for (int j = 0; j < cantOfFiles; j++) {
-		if (!validateBlockchainFile(fileRoute[j])) {
-			fileRoute.erase(fileRoute.begin() + j);
-			pathnames.erase(pathnames.begin() + j);
-			labels.erase(labels.begin() + j);	
+	for (int j = cantOfFiles; j > 0; j--) {
+		if (!validateBlockchainFile(fileRoute[j-1])) {
+			if (j != 0) {
+				fileRoute.erase(fileRoute.begin() + j - 1);
+				pathnames.erase(pathnames.begin() + j - 1);
+				labels.erase(labels.begin() + j - 1);
+			}
+			else {
+				fileRoute.clear();
+				pathnames.clear();
+				labels.clear();
+			}
 			cont++;
 		}
 	}
+
 	cantOfFiles -= cont;
 }
 
 bool Model::validateBlockchainFile(std::string fileName) {
 	jsonHandl.jsonStartHandler(fileName);
-	std::string target = "text";
-	//target = "previousblockid";
-	if (jsonHandl.existJsonElement(target)) {
-		//target = "height";
-		if (jsonHandl.existJsonElement(target)) {
-			//target = "nonce";
-			if (jsonHandl.existJsonElement(target)) {
-				//target = "blockid";
-				if (jsonHandl.existJsonElement(target)) {
-					//target = "merkleroot";
-					if (jsonHandl.existJsonElement(target))
-						return true;
-				}
-			}
-		}
-	}
-	return false;
+	return (jsonHandl.existJsonBlock());
 }
 
 void Model::findNumberOfBlocks() {
@@ -125,20 +117,20 @@ void Model::findNumberOfBlocks() {
 	//					La cantidad de bloques(cantOfBlocks)
 	//					Llenar un vector con la ruta de cada bloque para poder accederlos despues(blockRoute)
 	//Estas dos cosas deben hacer sobre el elemento fileRoute[fileElected];
-
+		
 
 	//Para debuggear le digo que encontro 10, 20 o 30 bloques y que la ruta es simplemente un numero
-	/*switch (fileElected) {
-		case 0: case 1:case 2:case 3:case 4:
+	switch (fileElected) {
+		case 0: case 9:case 5:case 3:case 4:
 			cantOfBlocks = 10;
 			break;
-		case 5:case 6:case 7:case 8:
+		case 1:case 6:case 7:case 8:
 			cantOfBlocks = 20;
 			break;
-		case 9:case 10:case 11:case 12:
+		case 2:case 10:case 11:case 12:
 			cantOfBlocks = 30;
 			break;
-	}*/
+	}
 	for (int i = 0; i < cantOfBlocks; i++) {
 		std::string name = "Block " + std::to_string(i);
 		blockNames.push_back(name);
