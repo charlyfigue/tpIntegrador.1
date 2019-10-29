@@ -46,6 +46,7 @@ private:
 	int cantOfFiles;
 	bool finish;
 	int fileElected;
+	int blockElected;
 
 	bool validateBlockchainFile(std::string fileName);
 };

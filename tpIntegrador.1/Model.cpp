@@ -11,6 +11,7 @@ Model::Model() {
 		blocksLabel[a] = false;
 	}
 	fileElected = -1;
+	blockElected = -1;
 	finish = false;
 	fileRoute.clear();
 	pathnames.clear();
@@ -27,6 +28,7 @@ void Model::reInitSearchFileFromFolder() {
 		blocksLabel[a] = false;
 	}
 	fileElected = -1;
+	blockElected = -1;
 	cantOfBlocks = 0;
 }
 
@@ -44,6 +46,7 @@ void Model::blockChoosen(int position) {
 	for (int i = 0; i < cantOfBlocks; i++)
 		if (i != position)
 			blocksLabel[i] = false;
+	blockElected = position;
 }
 
 void Model::setFileChoseen(int position) {
@@ -116,7 +119,7 @@ void Model::findNumberOfBlocks() {
 	jsonHandl.setRouteOfJsonBlock();
 
 	cantOfBlocks = jsonHandl.getCantOfBlocksFounded();
-	blockRoute = jsonHandl.getRoutesOfBlocks();
+	//blockRoute = jsonHandl.getRoutesOfBlocks();
 	
 	//Para debuggear le digo que encontro 10, 20 o 30 bloques y que la ruta es simplemente un numero
 	for (int i = 0; i < cantOfBlocks; i++) {
@@ -130,7 +133,9 @@ void Model::viewInformation() {
 }
 
 void Model::calculateMerkle() {
-	tree.calculateMerkle();
+	std::vector<std::string> txidElements = jsonHandl.getTxidTransformed(blockElected);
+	std::cout << "La cantidad de txid es: " << txidElements.size() << std::endl;
+	tree.calculateMerkle(txidElements, jsonHandl.getCantOfTxid());
 }
 
 void Model::validateMerkle() {

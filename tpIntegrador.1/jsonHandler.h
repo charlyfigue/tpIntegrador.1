@@ -29,9 +29,11 @@ public:
 	vector<string> getTweet(void);
 	void printTweet(void);
 	void printDate(void);
-
+	std::vector<std::string> getTxidTransformed(int blockElected);
+	
 	int getCantOfBlocksFounded() { return blocksFounded; }
 	vector<route>* getRoutesOfBlocks() { return &routesOfBlocks; }
+	int getCantOfTxid() { return cantOfTxid; }
 
 private:
 	json j;
@@ -40,4 +42,5 @@ private:
 	vector<string> tweet;
 	vector<string> date;
 	int blocksFounded;
+	int cantOfTxid;
 };

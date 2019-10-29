@@ -110,18 +110,20 @@ bool jsonHandler::existJsonTransactionBlock(json::iterator begin, json::iterator
 			}
 			else if (it.key() == "vin") {
 				if (((*it).empty() == false) && ((*it).is_array())) {
-					int cont = 0;
+					bool temp_isValid = true;
 					for (auto& x : (*it).items()) {
-						cont++;
 						if ((x.value()).is_object()) {
-							isValid = existJsonTransactonVinBlock((x.value()).begin(), (x.value()).end());
+							temp_isValid = existJsonTransactonVinBlock((x.value()).begin(), (x.value()).end());
+							if (!temp_isValid)
+								break;
 						}
 						else {
-							isValid = false;
+							temp_isValid = false;
 							break;
 						}
 					}
-					if (isValid && (cont == 1))
+					isValid = temp_isValid;
+					if (isValid)
 						result++;
 				}
 				else
@@ -129,18 +131,20 @@ bool jsonHandler::existJsonTransactionBlock(json::iterator begin, json::iterator
 			}
 			else if (it.key() == "vout") {
 				if (((*it).empty() == false) && ((*it).is_array())) {
-					int cont = 0;
+					bool temp_isValid = true;
 					for (auto& x : (*it).items()) {
-						cont++;
 						if ((x.value()).is_object()) {
-							isValid = existJsonTransactonVoutBlock((x.value()).begin(), (x.value()).end());
+							temp_isValid = existJsonTransactonVoutBlock((x.value()).begin(), (x.value()).end());
+							if (!temp_isValid)
+								break;
 						}
 						else {
-							isValid = false;
+							temp_isValid = false;
 							break;
 						}
 					}
-					if (isValid && (cont == 1))
+					isValid = temp_isValid;
+					if (isValid)
 						result++;
 				}
 				else
@@ -303,4 +307,35 @@ void jsonHandler::printDate(void)
 {
 	for (int i = 0; i < getDate().size(); i++) 
 		cout << getDate().at(i) << ' ' << endl;
+}
+
+std::vector<std::string> jsonHandler::getTxidTransformed(int blockElected) {
+	std::vector<std::string> elementos;
+	for (json::iterator it = (routesOfBlocks[blockElected].begin); it != (routesOfBlocks[blockElected].end); it++) {
+		if (it.key() == "tx") {
+			if (((*it).empty() == false) && ((*it).is_array())) {
+				for (auto& x : (*it).items()) {
+					if (x.value().is_object()){
+						for (json::iterator at = (x.value()).begin(); at != (x.value()).end(); at++) {
+							if (((*at).is_array()) && (at.key() == "vin")) {
+								for (auto& y : (*at).items()) {
+									if (y.value().is_object()) {
+										for (json::iterator et = (y.value()).begin(); et != (y.value()).end(); et++) {
+											if (et.key() == "txid") {
+												elementos.push_back(et.value());
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	cantOfTxid = elementos.size();
+	//std::cout << elementos[0].c_str() << std::endl;
+	return elementos;
 }

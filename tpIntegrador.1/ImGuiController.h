@@ -42,6 +42,7 @@ private:
 	bool shouldQuit;
 	bool isCantidad;
 	bool stateOfScroll;
+	bool watchingOutput;
 	int oldCantidadTuits;
 	int cantidadTuits;
 	int velocidad;

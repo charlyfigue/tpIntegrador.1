@@ -7,6 +7,7 @@
 using namespace boost::filesystem;
 
 ImGuiController::ImGuiController(imguiAcces* imguiInterfaz, Model& modelo) : Controller(modelo) {
+	watchingOutput = false;
 	lookProperties = false;
 	lookBlocksProperties = false;
 	calculateMerkleRoot = false;
@@ -134,21 +135,34 @@ void ImGuiController::dispatch() {
 			}
 			else {
 				if (lookBlocksProperties) {
-					m.viewInformation();
+					if (!watchingOutput) {
+						m.viewInformation();
+						watchingOutput = true;
+					}
 				}
 				else if (calculateMerkleRoot) {
-					m.calculateMerkle();
+					if (!watchingOutput) {
+						m.calculateMerkle();
+						watchingOutput = true;
+					}
 				}
 				else if (validateMerkleRoot) {
-					m.validateMerkle();
+					if (!watchingOutput) {
+						m.validateMerkle();
+						watchingOutput = true;
+					}
 				}
 				else {
-					m.watchMerkle();
+					if (!watchingOutput) {
+						m.watchMerkle();
+						watchingOutput = true;
+					}
 				}
 				ImGui::NewLine();
 				ImGui::NewLine();
 				if (ImGui::Button("Volver")) {
 					m.reInitSearchBlockFromFile();
+					watchingOutput = false;
 					if (lookBlocksProperties)
 						lookBlocksProperties = false;
 					if (calculateMerkleRoot)
