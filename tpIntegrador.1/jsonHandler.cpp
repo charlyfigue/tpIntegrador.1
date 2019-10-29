@@ -141,6 +141,7 @@ bool jsonHandler::existJsonTransactionBlock(json::iterator begin, json::iterator
 		isValid = false;
 	else
 		isValid = true;
+	return isValid;
 }
 
 bool jsonHandler::existJsonTransactonVoutBlock(json::iterator begin, json::iterator end) {
