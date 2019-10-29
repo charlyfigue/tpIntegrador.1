@@ -39,7 +39,7 @@ private:
 	std::vector<std::string> pathnames;
 	std::vector<bool> labels;
 	std::vector<std::string> blockNames;
-	std::vector<std::string> blockRoute;
+	std::vector<route>* blockRoute;//std::vector<std::string> blockRoute;
 	bool pathLabel[50];
 	bool blocksLabel[50];
 	int cantOfBlocks;

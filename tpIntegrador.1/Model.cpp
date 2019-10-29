@@ -16,7 +16,7 @@ Model::Model() {
 	pathnames.clear();
 	labels.clear();
 	blockNames.clear();
-	blockRoute.clear();
+	//blockRoute.clear();
 	cantOfFiles = 0;
 	cantOfBlocks = 0;
 }
@@ -108,33 +108,20 @@ bool Model::validateBlockchainFile(std::string fileName) {
 void Model::findNumberOfBlocks() {
 
 	blockNames.clear();
-	blockRoute.clear();
+	
 	for (int a = 0; a < 50; a++)
 		blocksLabel[a] = false;
 
-	//Hacer la funcion que busca cantidad de bloque
-	//Tiene que determinar:
-	//					La cantidad de bloques(cantOfBlocks)
-	//					Llenar un vector con la ruta de cada bloque para poder accederlos despues(blockRoute)
-	//Estas dos cosas deben hacer sobre el elemento fileRoute[fileElected];
-		
+	jsonHandl.jsonStartHandler(fileRoute[fileElected]);
+	jsonHandl.setRouteOfJsonBlock();
 
+	cantOfBlocks = jsonHandl.getCantOfBlocksFounded();
+	blockRoute = jsonHandl.getRoutesOfBlocks();
+	
 	//Para debuggear le digo que encontro 10, 20 o 30 bloques y que la ruta es simplemente un numero
-	switch (fileElected) {
-		case 0: case 9:case 5:case 3:case 4:
-			cantOfBlocks = 10;
-			break;
-		case 1:case 6:case 7:case 8:
-			cantOfBlocks = 20;
-			break;
-		case 2:case 10:case 11:case 12:
-			cantOfBlocks = 30;
-			break;
-	}
 	for (int i = 0; i < cantOfBlocks; i++) {
 		std::string name = "Block " + std::to_string(i);
 		blockNames.push_back(name);
-		blockRoute.push_back(std::to_string(i));
 	}
 }
 

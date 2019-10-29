@@ -1,7 +1,7 @@
 #include "jsonHandler.h"
 
-using json = nlohmann::json;
-using namespace std;
+//using json = nlohmann::json;
+//using namespace std;
 
 void jsonHandler::jsonStartHandler(string route)
 {
@@ -21,7 +21,22 @@ bool jsonHandler::existJsonElementBlock(json::iterator begin, json::iterator end
 	//for (json::iterator it = j.begin(); it != j.end(); it++) {
 	for (json::iterator it = begin; it != end; it++) {
 		if (it.key() == "tx") {
-			result++;
+			if (((*it).empty() == false) && ((*it).is_array())) {
+				for (auto& x : (*it).items()) {
+					if ((x.value()).is_object()) {
+						isValid = existJsonTransactionBlock((x.value()).begin(), (x.value()).end());
+					}
+					else
+						isValid = false;
+				}
+				if(isValid)
+					result++;
+			}
+			else if (((*it).empty() == true) && ((*it).is_array())) {
+				result++;
+			}
+			else
+				isValid = false;
 		}
 		else if (it.key() == "height") {
 			if ((*it).empty() == false)
@@ -54,11 +69,8 @@ bool jsonHandler::existJsonElementBlock(json::iterator begin, json::iterator end
 				isValid = false;
 		}
 		else if (it.key() == "nTx") {
-			if (((*it).empty() == false) && ((*it).is_object())) {
-				etBegin = (*it).begin();
-				etEnd = (*it).end();
+			if ((*it).empty() == false)
 				result++;
-			}
 			else
 				isValid = false;
 		}
@@ -67,80 +79,79 @@ bool jsonHandler::existJsonElementBlock(json::iterator begin, json::iterator end
 		isValid = false;
 	else
 		isValid = true;
-	if (!isValid)
-		return isValid;
-	else {
-		isValid = existJsonTransactionBlock(etBegin, etEnd);
-		return isValid;
-	}
+	return isValid;
 }
 
 bool jsonHandler::existJsonTransactionBlock(json::iterator begin, json::iterator end) {
 	int result = 0;
 	bool isValid;
-	
-	for (json::iterator it = begin; it != end; it++) {
-		if (it.key() == "txid") {
-			if ((*it).empty() == false)
-				result++;
-			else
-				isValid = false;
-		}
-		else if (it.key() == "nTxin") {
-			if ((*it).empty() == false)
-				result++;
-			else
-				isValid = false;
-		}
-		else if (it.key() == "nTxout") {
-			if ((*it).empty() == false)
-				result++;
-			else
-				isValid = false;
-		}
-		else if (it.key() == "vin") {
-			if (((*it).empty() == false) && ((*it).is_array())) {
-				int cont = 0;
-				for (auto& x : (*it).items()) {
-					cont++;
-					if ((x.value()).is_object()) {
-						isValid = existJsonTransactonVinBlock((x.value()).begin(), (x.value()).end());
-					}
-					else {
-						isValid = false;
-						break;
-					}
-				}
-				if(isValid && (cont == 1))
-					result++;
-			}
-			else
-				isValid = false;
-		}
-		else if (it.key() == "vout") {
-			if (((*it).empty() == false) && ((*it).is_array())) {
-				int cont = 0;
-				for (auto& x : (*it).items()) {
-					cont++;
-					if ((x.value()).is_object()) {
-						isValid = existJsonTransactonVoutBlock((x.value()).begin(), (x.value()).end());
-					}
-					else {
-						isValid = false;
-						break;
-					}
-				}
-				if (isValid && (cont == 1))
-					result++;
-			}
-			else
-				isValid = false;
-		}
-	}
-	if (result != 5)
-		isValid = false;
-	else
+
+	if (begin == end)
 		isValid = true;
+	else {
+		for (json::iterator it = begin; it != end; it++) {
+			if (it.key() == "txid") {
+				if ((*it).empty() == false)
+					result++;
+				else
+					isValid = false;
+			}
+			else if (it.key() == "nTxin") {
+				if ((*it).empty() == false)
+					result++;
+				else
+					isValid = false;
+			}
+			else if (it.key() == "nTxout") {
+				if ((*it).empty() == false)
+					result++;
+				else
+					isValid = false;
+			}
+			else if (it.key() == "vin") {
+				if (((*it).empty() == false) && ((*it).is_array())) {
+					int cont = 0;
+					for (auto& x : (*it).items()) {
+						cont++;
+						if ((x.value()).is_object()) {
+							isValid = existJsonTransactonVinBlock((x.value()).begin(), (x.value()).end());
+						}
+						else {
+							isValid = false;
+							break;
+						}
+					}
+					if (isValid && (cont == 1))
+						result++;
+				}
+				else
+					isValid = false;
+			}
+			else if (it.key() == "vout") {
+				if (((*it).empty() == false) && ((*it).is_array())) {
+					int cont = 0;
+					for (auto& x : (*it).items()) {
+						cont++;
+						if ((x.value()).is_object()) {
+							isValid = existJsonTransactonVoutBlock((x.value()).begin(), (x.value()).end());
+						}
+						else {
+							isValid = false;
+							break;
+						}
+					}
+					if (isValid && (cont == 1))
+						result++;
+				}
+				else
+					isValid = false;
+			}
+		}
+		if (result != 5)
+			isValid = false;
+		else
+			isValid = true;
+	}
 	return isValid;
 }
 
@@ -240,6 +251,35 @@ void jsonHandler::getJson(void)
 			tweet.push_back(tw);
 			date.push_back(d);
 		}
+	}
+}
+
+void jsonHandler::setRouteOfJsonBlock() {
+	int result = 0;
+	bool isValid;
+	
+	blocksFounded = 0;
+	routesOfBlocks.clear();
+
+	if (j.is_array()) {
+		for (auto& x : j.items()) {
+			if ((x.value()).is_object()) {
+				if (existJsonElementBlock((x.value()).begin(), (x.value()).end())) {
+					blocksFounded++;
+					route electedBlockRoute;
+					electedBlockRoute.begin = (x.value()).begin();
+					electedBlockRoute.end = (x.value()).end();
+					routesOfBlocks.push_back(electedBlockRoute);
+				}
+			}
+		}
+	}
+	else if (j.is_object()) {
+		blocksFounded = 1;
+		route electedBlockRoute;
+		electedBlockRoute.begin = j.begin();
+		electedBlockRoute.end = j.end();
+		routesOfBlocks.push_back(electedBlockRoute);
 	}
 }
 
