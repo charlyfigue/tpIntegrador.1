@@ -30,7 +30,10 @@ public:
 	void printTweet(void);
 	void printDate(void);
 	std::vector<std::string> getTxidTransformed(int blockElected);
-	
+	std::string findMerkle(int blockElected);
+	void changeMerkle(std::string calculated, int blockElected);
+	std::string viewInformation(int blockElected);
+
 	int getCantOfBlocksFounded() { return blocksFounded; }
 	vector<route>* getRoutesOfBlocks() { return &routesOfBlocks; }
 	int getCantOfTxid() { return cantOfTxid; }

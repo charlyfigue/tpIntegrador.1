@@ -10,7 +10,7 @@ void MerkleTree::viewInformation() {
 
 }
 
-void MerkleTree::calculateMerkle(std::vector<std::string> txidElements, int cantidad) {
+std::string MerkleTree::calculateMerkle(std::vector<std::string> txidElements, int cantidad) {
 	numberOfLeafs = 0;
 	if (cantidad) {
 		for (int i = 0; i < cantidad; i++) {
@@ -21,9 +21,12 @@ void MerkleTree::calculateMerkle(std::vector<std::string> txidElements, int cant
 			numberOfLeafs++;
 			leafs.push_back(idChanged);
 		}
+		return leafs.back();
 	}
-	else
+	else {
 		std::cout << "No hay transacciones para generar el arbol" << std::endl;
+		return NO_TRANSACTION;
+	}
 	
 }
 

@@ -309,6 +309,54 @@ void jsonHandler::printDate(void)
 		cout << getDate().at(i) << ' ' << endl;
 }
 
+std::string jsonHandler::viewInformation(int blockElected) {
+	std::string message;
+	for (json::iterator it = (routesOfBlocks[blockElected].begin); it != (routesOfBlocks[blockElected].end); it++) {
+		if (it.key() == "blockid") {
+			message += "El ID del bloque actual es: ";
+			message += (it.value()).get<std::string>();
+			message += '\n';
+		}
+		else if (it.key() == "previousblockid") {
+			message += "El ID del bloque anterior es: ";
+			message += (it.value()).get<std::string>();
+			message += '\n';
+		}
+		else if (it.key() == "nTx") {
+			message += "La cantidad de transaccion hechas es: ";
+			message += (it.value()).get<int>();
+			message += '\n';
+		}
+		else if (it.key() == "height") {
+			message += "El numero de bloque es: ";
+			message += (it.value()).get<int>();
+			message += '\n';
+		}
+		else if (it.key() == "nonce") {
+			message += "El Nonce es: ";
+			message += (it.value()).get<int>();
+			message += '\n';
+		}
+	}
+	std::cout << message.c_str() << std::endl;
+	return message;
+}
+std::string jsonHandler::findMerkle(int blockElected) {
+	for (json::iterator it = (routesOfBlocks[blockElected].begin); it != (routesOfBlocks[blockElected].end); it++) {
+		if (it.key() == "merkleroot") {
+			return (it.value());
+		}
+	}
+}
+
+void jsonHandler::changeMerkle(std::string calculated, int blockElected) {
+	for (json::iterator it = (routesOfBlocks[blockElected].begin); it != (routesOfBlocks[blockElected].end); it++) {
+		if (it.key() == "merkleroot") {
+			it.value() = calculated;
+		}
+	}
+}
+
 std::vector<std::string> jsonHandler::getTxidTransformed(int blockElected) {
 	std::vector<std::string> elementos;
 	for (json::iterator it = (routesOfBlocks[blockElected].begin); it != (routesOfBlocks[blockElected].end); it++) {

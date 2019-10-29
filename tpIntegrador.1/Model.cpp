@@ -129,17 +129,32 @@ void Model::findNumberOfBlocks() {
 }
 
 void Model::viewInformation() {
-	tree.viewInformation();
+	information = jsonHandl.viewInformation(blockElected);
 }
 
-void Model::calculateMerkle() {
+std::string Model::calculateMerkle() {
 	std::vector<std::string> txidElements = jsonHandl.getTxidTransformed(blockElected);
 	std::cout << "La cantidad de txid es: " << txidElements.size() << std::endl;
-	tree.calculateMerkle(txidElements, jsonHandl.getCantOfTxid());
+	return(tree.calculateMerkle(txidElements, jsonHandl.getCantOfTxid()));
 }
 
 void Model::validateMerkle() {
-	tree.validateMerkle();
+	std::string actual = getMerkle();
+	std::string calculated = calculateMerkle();
+	if (calculated == actual)
+		validMessage =  "The actual merkleTree is valid";
+	else {
+		changeMerkle(calculated);
+		validMessage = "The actual merkleTree is invalid. Proceeding to change it";
+	}
+}
+
+void Model::changeMerkle(std::string calculated) {
+	 jsonHandl.changeMerkle(calculated, blockElected);
+}
+
+std::string Model::getMerkle(void) {
+	return (jsonHandl.findMerkle(blockElected));
 }
 
 void Model::watchMerkle() {

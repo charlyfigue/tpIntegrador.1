@@ -19,9 +19,10 @@ public:
 	void findNumberOfBlocks(void);
 	void setFileChoseen(int position);
 	void viewInformation();
-	void calculateMerkle();
+	std::string calculateMerkle();
 	void validateMerkle();
 	void watchMerkle();
+	void changeMerkle(std::string calculated);
 
 	int getCantOfFiles() { return cantOfFiles; }
 	std::vector<bool>* getLabels() { return &labels; }
@@ -30,11 +31,16 @@ public:
 	std::vector<std::string>* getPathnames() { return &pathnames; }
 	int getNumberOfBlocks() { return cantOfBlocks; }
 	std::vector<std::string>* getBlockNames() { return &blockNames; }
+	std::string getMerkle(void);
+	std::string getValidMessage() {return validMessage;}
+	std::string getInformationMessage() { return information; }
 
 private:
 	MerkleTree tree;
 	jsonHandler jsonHandl;
 	std::string path;
+	std::string validMessage;
+	std::string information;
 	std::vector<std::string> fileRoute;
 	std::vector<std::string> pathnames;
 	std::vector<bool> labels;

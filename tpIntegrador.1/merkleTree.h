@@ -2,11 +2,13 @@
 #include <iostream>
 #include <vector>
 
+#define NO_TRANSACTION "Error en la transaccion"
+
 class MerkleTree {
 public:
 	MerkleTree();
 	void viewInformation(void);
-	void calculateMerkle(std::vector<std::string>, int);
+	std::string calculateMerkle(std::vector<std::string>, int);
 	void validateMerkle(void);
 	void watchMerkle(void);
 

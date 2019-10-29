@@ -139,18 +139,24 @@ void ImGuiController::dispatch() {
 						m.viewInformation();
 						watchingOutput = true;
 					}
+					ImGui::NewLine();
+					ImGui::Text((m.getInformationMessage()).c_str());
 				}
 				else if (calculateMerkleRoot) {
 					if (!watchingOutput) {
 						m.calculateMerkle();
 						watchingOutput = true;
 					}
+					ImGui::NewLine();
+					ImGui::Text((m.getMerkle()).c_str());
 				}
 				else if (validateMerkleRoot) {
 					if (!watchingOutput) {
 						m.validateMerkle();
 						watchingOutput = true;
 					}
+					ImGui::NewLine();
+					ImGui::Text((m.getValidMessage()).c_str());
 				}
 				else {
 					if (!watchingOutput) {
