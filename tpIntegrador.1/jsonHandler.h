@@ -1,8 +1,9 @@
 #pragma once
-#include "json.hpp"
+//#include "json.hpp"
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "Block.h"
 
 class jsonHandler;
 
@@ -25,15 +26,11 @@ public:
 	bool existJsonTransactonVoutBlock(json::iterator begin, json::iterator end);
 	bool existJsonTransactonVinBlock(json::iterator begin, json::iterator end);
 	void setRouteOfJsonBlock(void);
-	vector<string> getDate(void);
-	vector<string> getTweet(void);
-	void printTweet(void);
-	void printDate(void);
 	std::vector<std::string> getTxidTransformed(int blockElected);
 	std::string findMerkle(int blockElected);
 	void changeMerkle(std::string calculated, int blockElected);
-	std::string viewInformation(int blockElected);
-
+	
+	std::string getInformation(std::string target, int position);
 	int getCantOfBlocksFounded() { return blocksFounded; }
 	vector<route>* getRoutesOfBlocks() { return &routesOfBlocks; }
 	int getCantOfTxid() { return cantOfTxid; }

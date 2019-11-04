@@ -1,8 +1,5 @@
 #include "jsonHandler.h"
 
-//using json = nlohmann::json;
-//using namespace std;
-
 void jsonHandler::jsonStartHandler(string route)
 {
 	string readString;
@@ -13,24 +10,28 @@ void jsonHandler::jsonStartHandler(string route)
 }
 
 bool jsonHandler::existJsonElementBlock(json::iterator begin, json::iterator end) {
-
+	int contCalculated = 0;
+	int contWritten = 0;
 	int result = 0;
-	bool isValid;
+	bool isValid = true;
 	json::iterator etBegin;
 	json::iterator etEnd;
-	//for (json::iterator it = j.begin(); it != j.end(); it++) {
 	for (json::iterator it = begin; it != end; it++) {
 		if (it.key() == "tx") {
 			if (((*it).empty() == false) && ((*it).is_array())) {
 				for (auto& x : (*it).items()) {
 					if ((x.value()).is_object()) {
-						isValid = existJsonTransactionBlock((x.value()).begin(), (x.value()).end());
+						if (isValid = existJsonTransactionBlock((x.value()).begin(), (x.value()).end()))
+							contCalculated++;
+						else 
+							break;
 					}
-					else
+					else {
 						isValid = false;
+						break;
+					}
 				}
-				if(isValid)
-					result++;
+				result++;
 			}
 			else if (((*it).empty() == true) && ((*it).is_array())) {
 				result++;
@@ -69,22 +70,28 @@ bool jsonHandler::existJsonElementBlock(json::iterator begin, json::iterator end
 				isValid = false;
 		}
 		else if (it.key() == "nTx") {
-			if ((*it).empty() == false)
+			if ((*it).empty() == false) {
 				result++;
+				contWritten = it.value();
+			}
 			else
 				isValid = false;
 		}
 	}
-	if (result != 7)
-		isValid = false;
-	else
+	if (isValid && (result == 7) && (contWritten == contCalculated))
 		isValid = true;
+	else
+		isValid = false;
 	return isValid;
 }
 
 bool jsonHandler::existJsonTransactionBlock(json::iterator begin, json::iterator end) {
 	int result = 0;
 	bool isValid;
+	int contTxinCalculated = 0;
+	int contTxinWritten = 0;
+	int contTxoutCalculated = 0;
+	int contTxoutWritten = 0;
 
 	if (begin == end)
 		isValid = true;
@@ -97,14 +104,18 @@ bool jsonHandler::existJsonTransactionBlock(json::iterator begin, json::iterator
 					isValid = false;
 			}
 			else if (it.key() == "nTxin") {
-				if ((*it).empty() == false)
+				if ((*it).empty() == false) {
+					contTxinWritten = it.value();
 					result++;
+				}
 				else
 					isValid = false;
 			}
 			else if (it.key() == "nTxout") {
-				if ((*it).empty() == false)
+				if ((*it).empty() == false) {
+					contTxoutWritten = it.value();
 					result++;
+				}
 				else
 					isValid = false;
 			}
@@ -113,8 +124,9 @@ bool jsonHandler::existJsonTransactionBlock(json::iterator begin, json::iterator
 					bool temp_isValid = true;
 					for (auto& x : (*it).items()) {
 						if ((x.value()).is_object()) {
-							temp_isValid = existJsonTransactonVinBlock((x.value()).begin(), (x.value()).end());
-							if (!temp_isValid)
+							if (temp_isValid = existJsonTransactonVinBlock((x.value()).begin(), (x.value()).end()))
+								contTxinCalculated++;
+							else
 								break;
 						}
 						else {
@@ -134,8 +146,9 @@ bool jsonHandler::existJsonTransactionBlock(json::iterator begin, json::iterator
 					bool temp_isValid = true;
 					for (auto& x : (*it).items()) {
 						if ((x.value()).is_object()) {
-							temp_isValid = existJsonTransactonVoutBlock((x.value()).begin(), (x.value()).end());
-							if (!temp_isValid)
+							if (temp_isValid = existJsonTransactonVoutBlock((x.value()).begin(), (x.value()).end()))
+								contTxoutCalculated++;
+							else
 								break;
 						}
 						else {
@@ -151,10 +164,10 @@ bool jsonHandler::existJsonTransactionBlock(json::iterator begin, json::iterator
 					isValid = false;
 			}
 		}
-		if (result != 5)
-			isValid = false;
-		else
+		if ((result == 5) && isValid && (contTxinCalculated == contTxinWritten) && (contTxoutCalculated == contTxoutWritten))
 			isValid = true;
+		else
+			isValid = false;
 	}
 	return isValid;
 }
@@ -226,14 +239,6 @@ bool jsonHandler::existJsonBlock()
 		}
 		else if (j.is_object()) {
 			isValid = existJsonElementBlock(j.begin(), j.end());
-			/*if (!isValid) {
-				for (auto& x : j.items()){
-					if ((x.value()).is_object()) {
-						isValid = existJsonElementBlock(j.begin(), j.end());
-					}
-				}
-				isValid = false;
-			}*/
 		}
 		else
 			isValid = false;
@@ -287,60 +292,17 @@ void jsonHandler::setRouteOfJsonBlock() {
 	}
 }
 
-vector<string> jsonHandler::getTweet(void)
-{
-	return tweet;
-}
-
-vector<string> jsonHandler::getDate(void)
-{
-	return date;
-}
-
-void jsonHandler::printTweet(void)
-{
-	for (int i = 0; i < getTweet().size(); i++)
-		cout << getTweet().at(i) << ' ' << endl;
-}
-
-void jsonHandler::printDate(void)
-{
-	for (int i = 0; i < getDate().size(); i++) 
-		cout << getDate().at(i) << ' ' << endl;
-}
-
-std::string jsonHandler::viewInformation(int blockElected) {
-	std::string message;
+std::string jsonHandler::getInformation(std::string target, int blockElected) {
 	for (json::iterator it = (routesOfBlocks[blockElected].begin); it != (routesOfBlocks[blockElected].end); it++) {
-		if (it.key() == "blockid") {
-			message += "El ID del bloque actual es: ";
-			message += (it.value()).get<std::string>();
-			message += '\n';
-		}
-		else if (it.key() == "previousblockid") {
-			message += "El ID del bloque anterior es: ";
-			message += (it.value()).get<std::string>();
-			message += '\n';
-		}
-		else if (it.key() == "nTx") {
-			message += "La cantidad de transaccion hechas es: ";
-			message += (it.value()).get<int>();
-			message += '\n';
-		}
-		else if (it.key() == "height") {
-			message += "El numero de bloque es: ";
-			message += (it.value()).get<int>();
-			message += '\n';
-		}
-		else if (it.key() == "nonce") {
-			message += "El Nonce es: ";
-			message += (it.value()).get<int>();
-			message += '\n';
+		if (it.key() == target) {
+			if ((target != "nonce") && (target != "nTx") && (target != "height"))
+				return it.value();
+			else
+				return(std::to_string((it.value()).get<int>()));
 		}
 	}
-	std::cout << message.c_str() << std::endl;
-	return message;
 }
+
 std::string jsonHandler::findMerkle(int blockElected) {
 	for (json::iterator it = (routesOfBlocks[blockElected].begin); it != (routesOfBlocks[blockElected].end); it++) {
 		if (it.key() == "merkleroot") {

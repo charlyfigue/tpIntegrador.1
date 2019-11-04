@@ -23,12 +23,12 @@ bool imguiAcces::imguiBegin(){
 									al_register_event_source(eventQueue, al_get_keyboard_event_source());
 									al_register_event_source(eventQueue, al_get_mouse_event_source());
 									al_register_event_source(eventQueue, al_get_display_event_source(display));
-									al_set_window_title(display, "EDA Encoder");
+									al_set_window_title(display, "EDA");
 									IMGUI_CHECKVERSION();
 									ImGui::CreateContext();
 									ImGuiIO& io = ImGui::GetIO(); (void)io;
 									//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-									ImGui::StyleColorsDark();
+									ImGui::StyleColorsLight();
 									ImGui_ImplAllegro5_Init(display);
 									std::cout << "Initialization has been finished" << std::endl;
 									return true;

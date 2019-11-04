@@ -28,9 +28,11 @@ public:
 private:
 	void getEvent(void);
 	void dispatch(void);
+	void printBlocksProperties(int);
 	Evento ev;
 	ColaDeEvento eventQueue;
 	ALLEGRO_DISPLAY* display;
+	ALLEGRO_BITMAP* tempBitmap;
 	bool lookProperties;
 	bool lookBlocksProperties;
 	bool calculateMerkleRoot;

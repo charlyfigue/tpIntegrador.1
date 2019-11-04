@@ -1,7 +1,6 @@
 #include "Model.h"
 #include <iostream>
 #include <string>
-//#include "json.hpp"
 
 using namespace boost::filesystem;
 
@@ -16,24 +15,13 @@ Model::Model() {
 	fileRoute.clear();
 	pathnames.clear();
 	labels.clear();
-	blockNames.clear();
-	//blockRoute.clear();
 	cantOfFiles = 0;
 	cantOfBlocks = 0;
 }
 
 void Model::reInitSearchFileFromFolder() {
-	for (int a = 0; a < 50; a++) {
+	for (int a = 0; a < 50; a++)
 		pathLabel[a] = false;
-		blocksLabel[a] = false;
-	}
-	fileElected = -1;
-	blockElected = -1;
-	cantOfBlocks = 0;
-}
-
-void Model::reInitSearchBlockFromFile() {
-	//
 }
 
 void Model::fileChoosen(int position) {
@@ -42,15 +30,18 @@ void Model::fileChoosen(int position) {
 			pathLabel[i] = false;
 }
 
-void Model::blockChoosen(int position) {
-	for (int i = 0; i < cantOfBlocks; i++)
-		if (i != position)
-			blocksLabel[i] = false;
-	blockElected = position;
+void Model::setFileChosen(int position) {
+	fileElected = position;
+	findNumberOfBlocks();
 }
 
-void Model::setFileChoseen(int position) {
-	fileElected = position;
+void Model::blockChoosen(int position) {
+	blockElected = position;
+	getBlockOfGroup(blockElected)->actualizeProperties();
+}
+
+void Model::noShowBlock(int position) {
+	blocksLabel[position] = false;
 }
 
 void Model::getFilesFromFolder(std::string path_t) {
@@ -63,44 +54,20 @@ void Model::getFilesFromFolder(std::string path_t) {
 			pathLabel[a] = false;
 		fileRoute.clear();
 		pathnames.clear();
-		labels.clear();
 		if (exists(p) && is_directory(p)) {
 			for (directory_iterator it{ p }; it != directory_iterator{}; it++) {
 				if ((*it).path().extension().string() == ".json") {
-					fileRoute.push_back ((*it).path().string());
-					pathnames.push_back((*it).path().filename().string());
+					if (validateBlockchainFile((*it).path().string())) {
+						fileRoute.push_back((*it).path().string());
+						pathnames.push_back((*it).path().filename().string());
+					}
 				}
 			}
 			cantOfFiles = pathnames.size();
-			for (int j = 0; j < cantOfFiles; j++) {
-				labels.push_back(false);
-			}
 		}
 		else
 			cantOfFiles = 0;
-		validateBlockchainFiles();
 	}
-}
-
-void Model::validateBlockchainFiles() {
-	int cont = 0;
-	for (int j = cantOfFiles; j > 0; j--) {
-		if (!validateBlockchainFile(fileRoute[j-1])) {
-			if (j != 0) {
-				fileRoute.erase(fileRoute.begin() + j - 1);
-				pathnames.erase(pathnames.begin() + j - 1);
-				labels.erase(labels.begin() + j - 1);
-			}
-			else {
-				fileRoute.clear();
-				pathnames.clear();
-				labels.clear();
-			}
-			cont++;
-		}
-	}
-
-	cantOfFiles -= cont;
 }
 
 bool Model::validateBlockchainFile(std::string fileName) {
@@ -108,55 +75,61 @@ bool Model::validateBlockchainFile(std::string fileName) {
 	return (jsonHandl.existJsonBlock());
 }
 
-void Model::findNumberOfBlocks() {
-
-	blockNames.clear();
-	
-	for (int a = 0; a < 50; a++)
-		blocksLabel[a] = false;
-
-	jsonHandl.jsonStartHandler(fileRoute[fileElected]);
-	jsonHandl.setRouteOfJsonBlock();
-
-	cantOfBlocks = jsonHandl.getCantOfBlocksFounded();
-	//blockRoute = jsonHandl.getRoutesOfBlocks();
-	
-	//Para debuggear le digo que encontro 10, 20 o 30 bloques y que la ruta es simplemente un numero
-	for (int i = 0; i < cantOfBlocks; i++) {
-		std::string name = "Block " + std::to_string(i);
-		blockNames.push_back(name);
+void Model::addBlocks() {
+	vector<route>* groupOfBlocks = jsonHandl.getRoutesOfBlocks();
+	for (int i = 0; i < (*groupOfBlocks).size(); i++) {
+		Block newBlock((*groupOfBlocks)[i].begin, (*groupOfBlocks)[i].end, i);
+		blocks.push_back(newBlock);
 	}
 }
 
+void Model::findNumberOfBlocks() {
+	blocks.clear();
+	for (int a = 0; a < 50; a++)
+		blocksLabel[a] = false;
+	jsonHandl.jsonStartHandler(fileRoute[fileElected]);
+	jsonHandl.setRouteOfJsonBlock();
+	addBlocks();
+	cantOfBlocks = jsonHandl.getCantOfBlocksFounded();
+}
+
 void Model::viewInformation() {
-	information = jsonHandl.viewInformation(blockElected);
+	information = "El merkleRoot es: " + (getBlockOfGroup(blockElected)->getMerkleRoot()) + "\n" +
+		"La cantidad de transaccciones es: " + (std::to_string(getBlockOfGroup(blockElected)->getNtx())) + "\n" +
+		"El ID es: " + (getBlockOfGroup(blockElected)->getId()) + "\n" +
+		"El ID del anterior bloque es: " + (getBlockOfGroup(blockElected)->getPreviousId()) + "\n" +
+		"El nonce es: " + (std::to_string(getBlockOfGroup(blockElected)->getNonce())) + "\n" +
+		"El height del bloque es: " + (std::to_string(getBlockOfGroup(blockElected)->getHeight())) + "\n";
+				
 }
 
 std::string Model::calculateMerkle() {
 	std::vector<std::string> txidElements = jsonHandl.getTxidTransformed(blockElected);
-	std::cout << "La cantidad de txid es: " << txidElements.size() << std::endl;
 	return(tree.calculateMerkle(txidElements, jsonHandl.getCantOfTxid()));
 }
 
+void Model::serMerkle(std::string value) {
+	calculatedMerkle = value;
+}
+
 void Model::validateMerkle() {
-	std::string actual = getMerkle();
+	std::string actual = getBlockOfGroup(blockElected)->getMerkleRoot();
 	std::string calculated = calculateMerkle();
 	if (calculated == actual)
 		validMessage =  "The actual merkleTree is valid";
 	else {
 		changeMerkle(calculated);
-		validMessage = "The actual merkleTree is invalid. Proceeding to change it";
+		validMessage = "The merkleTree was invalid. Modification updated";
 	}
 }
 
 void Model::changeMerkle(std::string calculated) {
 	 jsonHandl.changeMerkle(calculated, blockElected);
-}
-
-std::string Model::getMerkle(void) {
-	return (jsonHandl.findMerkle(blockElected));
+	 serMerkle(calculated);
 }
 
 void Model::watchMerkle() {
-	tree.watchMerkle();
+	calculateMerkle();
+	//setOutputImage(tree.watchMerkle(calculateMerkle()));
+	this->notifyAllObservers();
 }

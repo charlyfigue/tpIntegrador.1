@@ -67,8 +67,8 @@ void ImGuiController::dispatch() {
 
 		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-		ImGui::Begin("EDA Encoder");
-
+		ImGui::Begin("EDA TP Integrador");
+		
 		static char newpath[256] = {};
 		bool windows[1000];
 		int i = 0;
@@ -88,8 +88,7 @@ void ImGuiController::dispatch() {
 					ImGui::Text("      ");
 					ImGui::SameLine();
 					if (ImGui::Button("Propiedades")) {
-						m.setFileChoseen(j);
-						m.findNumberOfBlocks();
+						m.setFileChosen(j);
 						lookProperties = true;
 					}
 					m.fileChoosen(j);
@@ -103,84 +102,26 @@ void ImGuiController::dispatch() {
 			}
 		}
 		else {
-			if ((!lookBlocksProperties) && (!calculateMerkleRoot) && (!validateMerkleRoot) && (!watchMerkleRoot)) {
-				for (int j = 0; j < m.getNumberOfBlocks(); j++) {
-					ImGui::Checkbox(((m.getBlockNames())->at(j)).c_str(), &(m.getBlocksLabel())[j]);
-					if ((m.getBlocksLabel())[j]) {
-						ImGui::SameLine();
-						ImGui::Text("      ");
-						ImGui::SameLine();
-						ImGui::Columns(3, "Acciones posibles", false);
-						ImGui::NextColumn();
-						if (ImGui::Button("Propiedades"))
-							lookBlocksProperties = true;
-						if (ImGui::Button("Calcular Merkle root"))
-							calculateMerkleRoot = true;
-						if (ImGui::Button("Validar Merkle root"))
-							validateMerkleRoot = true;
-						if (ImGui::Button("Ver Merkle root"))
-							watchMerkleRoot = true;
-						ImGui::Columns();
-						m.blockChoosen(j);
-					}
-				}
-
-				ImGui::NewLine();
-				ImGui::NewLine();
-
-				if (ImGui::Button("Volver")) {
-					m.reInitSearchFileFromFolder();
-					lookProperties = false;
+			for (int j = 0; j < m.getNumberOfBlocks(); j++) {
+				ImGui::Checkbox((m.getBlockOfGroup(j)->getBlockName().c_str()), &(m.getBlocksLabel())[j]);//ImGui::Checkbox(((m.getBlockNames())->at(j)).c_str(), &(m.getBlocksLabel())[j]);
+				if ((m.getBlocksLabel())[j]) {
+					ImGui::End();
+					ImGui::Begin((m.getBlockOfGroup(j)->getBlockName().c_str()));//ImGui::Begin(((m.getBlockNames())->at(j)).c_str());
+					printBlocksProperties(j);
+					ImGui::End();
+					ImGui::Begin("EDA TP Integrador");
 				}
 			}
-			else {
-				if (lookBlocksProperties) {
-					if (!watchingOutput) {
-						m.viewInformation();
-						watchingOutput = true;
-					}
-					ImGui::NewLine();
-					ImGui::Text((m.getInformationMessage()).c_str());
-				}
-				else if (calculateMerkleRoot) {
-					if (!watchingOutput) {
-						m.calculateMerkle();
-						watchingOutput = true;
-					}
-					ImGui::NewLine();
-					ImGui::Text((m.getMerkle()).c_str());
-				}
-				else if (validateMerkleRoot) {
-					if (!watchingOutput) {
-						m.validateMerkle();
-						watchingOutput = true;
-					}
-					ImGui::NewLine();
-					ImGui::Text((m.getValidMessage()).c_str());
-				}
-				else {
-					if (!watchingOutput) {
-						m.watchMerkle();
-						watchingOutput = true;
-					}
-				}
-				ImGui::NewLine();
-				ImGui::NewLine();
-				if (ImGui::Button("Volver")) {
-					m.reInitSearchBlockFromFile();
-					watchingOutput = false;
-					if (lookBlocksProperties)
-						lookBlocksProperties = false;
-					if (calculateMerkleRoot)
-						calculateMerkleRoot = false;
-					if (validateMerkleRoot)
-						validateMerkleRoot = false;
-					if (watchMerkleRoot)
-						watchMerkleRoot = false;
-				}
+
+			ImGui::NewLine();
+			ImGui::NewLine();
+
+			if (ImGui::Button("Volver")) {
+				m.reInitSearchFileFromFolder();
+				lookProperties = false;
 			}
 		}
-
+		
 		ImGui::End();
 
 		// Rendering
@@ -188,5 +129,73 @@ void ImGuiController::dispatch() {
 		al_clear_to_color(al_map_rgba_f(clear_color.x, clear_color.y, clear_color.z, clear_color.w));
 		ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
 		al_flip_display();
+	}
+}
+
+void ImGuiController::printBlocksProperties(int j){
+	if((!m.getBlockOfGroup(j)->getLookProperties()) && (!m.getBlockOfGroup(j)->getCalculatedMerkle())
+		&& (!m.getBlockOfGroup(j)->getValidatedMerkle()) && (!m.getBlockOfGroup(j)->getWatchMerkle())){
+		ImGui::NewLine();
+		if (ImGui::Button("Propiedades"))
+			m.getBlockOfGroup(j)->setLookProperties(true);
+		if (ImGui::Button("Calcular Merkle root"))
+			m.getBlockOfGroup(j)->setCalculatedMerkle(true);
+		if (ImGui::Button("Validar Merkle root"))
+			m.getBlockOfGroup(j)->setValidatedMerkle(true);
+		if (ImGui::Button("Ver Merkle root"))
+			m.getBlockOfGroup(j)->setWatchMerkle(true);
+		m.blockChoosen(j);
+		ImGui::NewLine();
+		if (ImGui::Button("Cerrar")) {
+			m.noShowBlock(j);
+		}
+	}
+	else {
+		if (m.getBlockOfGroup(j)->getLookProperties()) {
+			if (!watchingOutput) {
+				m.viewInformation();
+				watchingOutput = true;
+			}
+			ImGui::NewLine();
+			ImGui::Text((m.getInformationMessage()).c_str());
+		}
+		else if (m.getBlockOfGroup(j)->getCalculatedMerkle()) {
+			if (!watchingOutput) {
+				m.serMerkle(m.calculateMerkle());
+				watchingOutput = true;
+			}
+			ImGui::NewLine();
+			ImGui::Text((m.getMerkle()).c_str());
+		}
+		else if (m.getBlockOfGroup(j)->getValidatedMerkle()) {
+			if (!watchingOutput) {
+				m.validateMerkle();
+				watchingOutput = true;
+			}
+			ImGui::NewLine();
+			ImGui::Text((m.getValidMessage()).c_str());
+		}
+		else {
+			if (!watchingOutput) {
+				m.watchMerkle();
+				watchingOutput = true;
+			}
+			ImGui::NewLine();
+			ImVec2 sizeImag = ImVec2(500.0f, 300.0f);
+			ImGui::Image(m.getOutputImage(), sizeImag);
+		}
+		ImGui::NewLine();
+		ImGui::NewLine();
+		if (ImGui::Button("Volver")) {
+			watchingOutput = false;
+			if (m.getBlockOfGroup(j)->getLookProperties())
+				m.getBlockOfGroup(j)->setLookProperties(false);
+			if (m.getBlockOfGroup(j)->getCalculatedMerkle())
+				m.getBlockOfGroup(j)->setCalculatedMerkle(false);
+			if (m.getBlockOfGroup(j)->getValidatedMerkle())
+				m.getBlockOfGroup(j)->setValidatedMerkle(false);
+			if (m.getBlockOfGroup(j)->getWatchMerkle())
+				m.getBlockOfGroup(j)->setWatchMerkle(false);
+		}
 	}
 }

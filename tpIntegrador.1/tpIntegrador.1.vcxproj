@@ -124,6 +124,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Block.cpp" />
     <ClCompile Include="imgui.cpp" />
     <ClCompile Include="imguiAcces.cpp" />
     <ClCompile Include="ImGuiController.cpp" />
@@ -136,8 +137,10 @@
     <ClCompile Include="merkleTree.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Subject.cpp" />
+    <ClCompile Include="View.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Block.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="imconfig.h" />
     <ClInclude Include="imconfig_allegro5.h" />
@@ -155,6 +158,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="Subject.h" />
+    <ClInclude Include="View.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
